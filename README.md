@@ -184,6 +184,8 @@ As described above, events are received in the onmessage handler:
     };
 ```
 
+The message format is described here: <https://www.developer.saxo/openapi/learn/plain-websocket-streaming#PlainWebSocketStreaming-Receivingmessages>.
+
 ### <a name="realtime5"></a>Step 5: Extend the subscription before the token expires
 
 The realtime feed will stop after the token has been expired. When the application has refreshed the token, there is a need to extend the subscription.
@@ -207,6 +209,10 @@ Extend the subscription using this code:
 **accessToken** – The Bearer token
 
 ### <a name="realtime6"></a>Step 6: Description of the data
+
+Besides the order events the server sends the following control messages: heartbeats (referenceId: \_heartbeat), disconnect events (\_disconnect) and data-clear-events (\_resetsubscriptions).
+
+More info: <https://www.developer.saxo/openapi/learn/plain-websocket-streaming#PlainWebSocketStreaming-Controlmessages>.
 
 #### Order-object
 
