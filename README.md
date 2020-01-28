@@ -1,6 +1,6 @@
 # <a name="documentation"></a>Saxo OpenApi documentation
 
-This document describes how an application can subscribe to the Saxo Event Notification Service (ENS).
+This document describes how a client application can subscribe to Saxo Bank's Event Notification Service (ENS).
 
 ## Table of contents
 
@@ -14,19 +14,19 @@ This document describes how an application can subscribe to the Saxo Event Notif
 
 ## <a name="realtime"></a>Get realtime data using the Saxo API
 
-This document describes the realtime feed available for customers. Assumption is that a token is already available.
+This document describes the realtime feed available for customers.
 
-Native web sockets are used. Examples in JavaScript.
+Native (plain) web sockets are used. Examples in JavaScript.
 
 > The WebSocket API is an advanced technology that makes it possible to open a two-way interactive communication session between the user's browser and a server. With this API, you can send messages to a server and receive event-driven responses without having to poll the server for a reply.
 
-More info: <https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications>.
+[More info](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications)
 
 Prerequisites:
 
-- A token retrieved using the OAuth2 Authentication flow, as described in the Saxo documentation: <>.
+- An access token retrieved using the OAuth2 Authentication flow, as described in the [Saxo documentation](https://www.developer.saxo/openapi/learn/security).
 
-For this example we use the simulation (sandbox) environment, with predefined test users and passwords.
+For this example we use the simulation (sandbox/SIM) environment, with predefined test users and passwords. A user can be created on [Saxo's Developer Portal](https://www.developer.saxo/accounts/sim/signup) for testing.
 
 ### <a name="realtime1"></a>Step 1: Connect to the feed
 
@@ -35,6 +35,7 @@ The WebSocket API can be used in JavaScript by any modern browser.
 The following code creates and starts a connection:
 
 ```javascript
+    var accessToken = // paste access token here
     var contextId = encodeURIComponent("MyApp" + Date.now());
     var streamerUrl = "wss://gateway.saxobank.com/sim/openapi/streamingws/connect?authorization=" + encodeURIComponent("BEARER " + accessToken) + "&contextId=" + contextId;
     var connection = new WebSocket(streamerUrl);
@@ -43,7 +44,7 @@ The following code creates and starts a connection:
 
 **accessToken** – The Bearer token
 
-The contextId uniquely defines the connection. A client application might have multiple connections.
+The contextId uniquely defines the connection. A client application might have multiple connections (this is not required however - a single connection can handle most scenarios).
 
 More info about the setup at Saxo: <https://www.developer.saxo/openapi/learn/plain-websocket-streaming>.
 
@@ -70,7 +71,7 @@ The following code configures the events:
 
 ### <a name="realtime3"></a>Step 3: Subscribe to updates
 
-In order to subscribe to events, you need to create a subscription with a POST request to the API. This is an example to subscribe to order events:
+An 'empty' streaming websocket connection is now configured. In order to subscribe to events to be sent on this connection, you need to create a subscription with a POST request to Saxo's OpenAPI. This is an example to subscribe to order events:
 
 ```javascript
     var data = {
@@ -144,7 +145,7 @@ As described above, events are received in the onmessage handler:
             var segmentEnd = payloadBeginIndex + 5 + payloadLength;
             var payload = String.fromCharCode.apply(String, bytes.slice(payloadBeginIndex + 5, segmentEnd));
             var block = JSON.parse(payload);
-            console.log("Message " + messageId + " parsed with referenceId " + refId + " and payload: " + payload");
+            console.log("Message " + messageId + " parsed with referenceId " + refId + " and payload: " + payload);
             block.ReferenceId = refId;
             block.MessageID = messageId;
             block.Timestamp = timeStamp;
@@ -188,7 +189,7 @@ The message format is described here: <https://www.developer.saxo/openapi/learn/
 
 ### <a name="realtime5"></a>Step 5: Extend the subscription before the token expires
 
-The realtime feed will stop after the token has been expired. When the application has refreshed the token, there is a need to extend the subscription.
+The streaming connection will stop when the client disconnects or at the end of the token's expiry. When the client application has refreshed the token using Saxo's standard OAuth refresh flow, any existing streaming connections should be updated with the same token to prevent interruption of the service.
 
 Extend the subscription using this code:
 
@@ -206,7 +207,7 @@ Extend the subscription using this code:
 ```
 
 **contextId** – The identifyer of the connection (so the server can determine the target connection)\
-**accessToken** – The Bearer token
+**accessToken** – The (new) Bearer token
 
 ### <a name="realtime6"></a>Step 6: Description of the data
 
