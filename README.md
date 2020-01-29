@@ -261,7 +261,7 @@ An order object is structured as following:
 }
 ```
 
-### <a name="realtime6"></a>Whats next: things to keep in mind
+### <a name="realtime7"></a>Whats next: things to keep in mind
 
 #### Using protobuf
 We want to encourage people to use protobuf, as it has less impact on our infrastructure.
