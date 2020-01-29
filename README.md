@@ -11,7 +11,8 @@ This document describes how a client application can subscribe to Saxo Bank's Ev
 [Step 4: Handling events](#realtime4)\
 [Step 5: Extend the subscription before the token expires](#realtime5)\
 [Step 6: Description of the data](#realtime6)\
-[Whats next: things to keep in mind](#realtime7)
+[Step 7: Adding a positions subscription](#realtime7)\
+[Whats next: things to keep in mind](#realtime8)
 
 ## <a name="realtime"></a>Get realtime data using the Saxo API
 
@@ -261,7 +262,63 @@ An order object is structured as following:
 }
 ```
 
-### <a name="realtime7"></a>Whats next: things to keep in mind
+### <a name="realtime7"></a>Adding a netpositions subscription
+
+Next, we need to create a netpositions subscripition, which will provide us with:
+1. A snapshot of the client's current positions, which includes *all* data for each netposition. This is similar to sending a GET request to the `/netpositions/me` endpoint.
+2. Delta updates whenever individual datapoints for each position change (think: current P&L, conversion rate for instruments in currencies different from the client's account currency, etc).
+
+The below code is very similar to the code in step 3. This new subscription will be stremaing updates on the **same** websocket connection. Not that the `AccountKey` field is optional: if it is *not* provided, netpositions for ALL of the client accounts will be streamed (this is likely what you want if you are looking to provide a 'complete overview' in your UI).
+
+```javascript
+    var data = {
+        "ContextId": contextId,
+        "ReferenceId": "netpositions",
+        "Arguments": {
+            "ClientKey": clientKey,
+            // "AccountKey": accountKey
+        }
+    };
+
+    $.ajax({
+        "dataType": "json",
+        "contentType": "application/json; charset=utf-8",
+        "type": "POST",
+        "url": "https://gateway.saxobank.com/sim/openapi/port/v1/netpositions/subscriptions",
+        "data": JSON.stringify(data),
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + accessToken
+        }
+    });
+```
+
+The response of the POST request includes the snapshot, with "full" details on the current state of the client's netpositions (not shown here to keep this short). Delta messages only include fields that actually change, which means a real-time representation of the client's portfolio can be created by combining these:
+
+```
+"Data": [
+  {
+  "NetPositionId": "EURJPY__FxSpot",
+  "NetPositionView": {
+    "Ask": 120.018,
+    "Bid": 119.983,
+    "ConversionRateCurrent": 0.0083333,
+    "CurrentPrice": 119.983,
+    "MarketValue": -37005000,
+    "MarketValueInBaseCurrency": -308373.77,
+    "ProfitLossOnTrade": -37005000,
+    "ProfitLossOnTradeInBaseCurrency": -308373.77,
+    "TradeCostsTotal": -181798,
+    "TradeCostsTotalInBaseCurrency": -1514.98
+    }
+  }
+]
+```
+
+Note the `ConversionRateCurrent` field, which can be used to convert instrument P&L to client account currency P&L (in this case for a JPY-denominated FX position on a USD account).
+
+### <a name="realtime8"></a>Whats next: things to keep in mind
 
 #### Using protobuf
 We want to encourage people to use protobuf, as it has less impact on our infrastructure.
