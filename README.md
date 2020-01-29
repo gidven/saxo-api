@@ -35,22 +35,27 @@ The WebSocket API can be used in JavaScript by any modern browser.
 The following code creates and starts a connection:
 
 ```javascript
-    var accessToken = // paste access token here
+    var accessToken = // paste access token here 
     var contextId = encodeURIComponent("MyApp" + Date.now());
     var streamerUrl = "wss://gateway.saxobank.com/sim/openapi/streamingws/connect?authorization=" + encodeURIComponent("BEARER " + accessToken) + "&contextId=" + contextId;
     var connection = new WebSocket(streamerUrl);
     console.log("Connection created. Status: " + connection.readyState);
 ```
 
-**accessToken** – The Bearer token
+**accessToken** –  The bearer token, also known as the access token, as provided by the Saxo SSO.
 
-The contextId uniquely defines the connection. A client application might have multiple connections (this is not required however - a single connection can handle most scenarios).
+**contextId** - A client-generated unique identifier for the connection. May be up to 50 characters allowing (a-z, A-Z, -, and _). A client application might have multiple connections, identified by different contextIds, but, as you will learn later in this document, one is usually enough per user, as multiple subscriptions can target the same connection.
 
 More info about the setup at Saxo: <https://www.developer.saxo/openapi/learn/plain-websocket-streaming>.
 
 ### <a name="realtime2"></a>Step 2: Handle connection events
 
-The user might stop the connection. Or something can go wrong with the server. Then the application might do a reconnect, or just show this to the user.
+The javascript connection handler implements the following named eventlisteners:
+
+* **onopen** - emitted right after the connection has been created succesfully
+* **onclose** - emitted if the connection, for some reason, is being closed
+* **onerror** - emitted of any kind of error has occured
+* **onmessage** - emitted on each message - with the actual content - recieved from the server 
 
 The following code configures the events:
 
@@ -106,8 +111,8 @@ An 'empty' streaming websocket connection is now configured. In order to subscri
     });
 ```
 
-**contextId** – The identifyer of the connection (so the server can determine the target connection)\
-**referenceId** – This is a reference for the updates; every event has a referenceId, to identify them - system events are prefixed by an underscore \
+**contextId** – The client-generated unique identifier for the connection (so the server can determine the target connection)\
+**referenceId** – The client-generated unique reference for the subscription; can be used to identify incoming messages as every event has a referenceId; can be used to do further actions on the subscription, ie. delete it. system events are prefixed by an underscore \
 **clientKey** – The key identifying the customer\
 **accountKey** – The key identifying the account\
 **accessToken** – The Bearer token
@@ -254,3 +259,7 @@ An order object is structured as following:
     ​Uic: 112809
 }
 ```
+
+### <a name="realtime6"></a>Alternative 1: Using protobuf
+We want to encourage people to use this as it has less impact on our infrastructure.
+
