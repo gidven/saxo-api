@@ -11,6 +11,7 @@ This document describes how a client application can subscribe to Saxo Bank's Ev
 [Step 4: Handling events](#realtime4)\
 [Step 5: Extend the subscription before the token expires](#realtime5)\
 [Step 6: Description of the data](#realtime6)\
+[Whats next: things to keep in mind](#realtime7)
 
 ## <a name="realtime"></a>Get realtime data using the Saxo API
 
@@ -35,7 +36,7 @@ The WebSocket API can be used in JavaScript by any modern browser.
 The following code creates and starts a connection:
 
 ```javascript
-    var accessToken = // paste access token here 
+    var accessToken = // paste access token here
     var contextId = encodeURIComponent("MyApp" + Date.now());
     var streamerUrl = "wss://gateway.saxobank.com/sim/openapi/streamingws/connect?authorization=" + encodeURIComponent("BEARER " + accessToken) + "&contextId=" + contextId;
     var connection = new WebSocket(streamerUrl);
@@ -112,7 +113,7 @@ An 'empty' streaming websocket connection is now configured. In order to subscri
 ```
 
 **contextId** – The client-generated unique identifier for the connection (so the server can determine the target connection)\
-**referenceId** – The client-generated unique reference for the subscription; can be used to identify incoming messages as every event has a referenceId; can be used to do further actions on the subscription, ie. delete it. system events are prefixed by an underscore \
+**referenceId** – The client-generated unique reference for the subscription; can be used to identify incoming messages as every event has a referenceId; can be used to do further actions on the subscription, ie. delete it - system event referenceIds are prefixed by an underscore, so better not start with an underscore \
 **clientKey** – The key identifying the customer\
 **accountKey** – The key identifying the account\
 **accessToken** – The Bearer token
@@ -260,6 +261,7 @@ An order object is structured as following:
 }
 ```
 
-### <a name="realtime6"></a>Alternative 1: Using protobuf
-We want to encourage people to use this as it has less impact on our infrastructure.
+### <a name="realtime6"></a>Whats next: things to keep in mind
 
+#### Using protobuf
+We want to encourage people to use protobuf, as it has less impact on our infrastructure.
