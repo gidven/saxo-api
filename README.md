@@ -11,7 +11,7 @@ This document describes how a client application can subscribe to Saxo Bank's Ev
 [Step 4: Handling events](#realtime4)\
 [Step 5: Extend the subscription before the token expires](#realtime5)\
 [Step 6: Description of the data](#realtime6)\
-[Step 7: Adding a positions subscription](#realtime7)\
+[Step 7: Adding a netpositions subscription](#realtime7)\
 [Whats next: things to keep in mind](#realtime8)
 
 ## <a name="realtime"></a>Get realtime data using the Saxo API
@@ -268,7 +268,7 @@ Next, we need to create a netpositions subscripition, which will provide us with
 1. A snapshot of the client's current positions, which includes *all* data for each netposition. This is similar to sending a GET request to the `/netpositions/me` endpoint.
 2. Delta updates whenever individual datapoints for each position change (think: current P&L, conversion rate for instruments in currencies different from the client's account currency, etc).
 
-The below code is very similar to the code in step 3. This new subscription will be stremaing updates on the **same** websocket connection. Not that the `AccountKey` field is optional: if it is *not* provided, netpositions for ALL of the client accounts will be streamed (this is likely what you want if you are looking to provide a 'complete overview' in your UI).
+The below code is very similar to the code in step 3. This new subscription will be stremaing updates on the **same** websocket connection. Note that the `AccountKey` field is optional: if it is *not* provided, netpositions for ALL of the client accounts will be streamed (this is likely what you want if you are looking to provide a 'complete overview' in your UI).
 
 ```javascript
     var data = {
